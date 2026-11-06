@@ -158,7 +158,7 @@ bash android/build.sh            # Windows: android\build.ps1
 adb install -r android/build/LogiSync.apk
 ```
 
-CI builds the APK on every push and attaches it to releases.
+CI builds the APK on every push (download it from the run artifacts). Release APKs are signed by the maintainer, so updates install over the previous version.
 
 ## Troubleshooting
 

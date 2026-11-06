@@ -4,8 +4,6 @@ on:
   push:
     branches: [main]
   pull_request:
-  release:
-    types: [published]
 
 jobs:
   android:
@@ -24,10 +22,6 @@ jobs:
         with:
           name: LogiSync-android
           path: android/build/LogiSync.apk
-      - if: github.event_name == 'release'
-        run: gh release upload "${{ github.event.release.tag_name }}" android/build/LogiSync.apk --clobber
-        env:
-          GH_TOKEN: ${{ github.token }}
 
   desktop:
     runs-on: ubuntu-latest
