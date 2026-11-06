@@ -109,3 +109,18 @@ Android lets any app ship physical-keyboard layouts: a receiver for
 what each scan code produces with no modifier, Shift, AltGr and Caps Lock, maps dead keys to
 Android combining accents (`´` → `́`, `~` → `̃`, ...), and writes the `.kcm`. The result is
 a layout that behaves exactly like the PC - e.g. ABNT2 on a US-printed keyboard, where `;` is `ç`.
+
+### Remote desktop
+
+Tested with Windows App 11.0 (Android) on Samsung DeX, connected to a Windows PC with ABNT2,
+typing into Notepad:
+
+| Physical layout on Android | Result on the remote PC |
+|---|---|
+| *igual ao Windows* (dead keys = combining accents) | `´a ˜a ç`: accents arrive detached |
+| *Área de Trabalho Remota* (dead keys = `none`) | `á ç ã`: correct |
+
+The client forwards the character Android produced whenever there is one, even with *Use scancode
+input when available* on. A dead key yields a bare spacing accent, which the remote PC cannot
+combine. With `none`, there is no character, so the client sends the scan code (`0x1A`), the remote
+Windows enters its own dead-key state and composes `á` with the next key.

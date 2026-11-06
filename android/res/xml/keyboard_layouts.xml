@@ -6,4 +6,10 @@
         android:keyboardLayout="@raw/abnt2_windows"
         android:keyboardLocale="pt-Latn-BR"
         android:keyboardLayoutType="qwerty" />
+    <keyboard-layout
+        android:name="abnt2_remote"
+        android:label="Português (Brasil ABNT2) - Área de Trabalho Remota"
+        android:keyboardLayout="@raw/abnt2_remote"
+        android:keyboardLocale="pt-Latn-BR"
+        android:keyboardLayoutType="qwerty" />
 </keyboard-layouts>

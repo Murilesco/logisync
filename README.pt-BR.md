@@ -68,7 +68,14 @@ roda escondida no logon. Para remover: `install-windows.ps1 -Uninstall`.
 3. Preencha os nomes do teclado e do mouse e o canal (ex.: `1`) e toque em **Salvar**.
    **Testar: mandar o mouse agora** deve mover o mouse na hora.
 4. *(opcional)* Com o teclado conectado ao celular, toque em **Escolher layout do teclado físico**
-   → seu teclado → cada teclado virtual → **Português (Brasil ABNT2) - igual ao Windows**.
+   → seu teclado → cada teclado virtual → escolha:
+   * **Português (Brasil ABNT2) - igual ao Windows**: para digitar nos apps do Android.
+   * **Português (Brasil ABNT2) - Área de Trabalho Remota**: para acesso remoto (Windows App,
+     RustDesk...), por exemplo o Samsung DeX conectado a um PC Windows. Ative também *Usar a
+     entrada scancode quando disponível* em Windows App → Configurações → Geral. Os acentos passam a
+     ser montados pelo Windows remoto, igual a um teclado local (`´` + `a` → `á`). Nos apps do
+     próprio celular, as teclas de acento do teclado físico não fazem nada com essa variante
+     (o teclado da tela não é afetado).
 
 ### Linux e macOS
 

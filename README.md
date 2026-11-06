@@ -76,7 +76,13 @@ that runs it hidden. Uninstall with `install-windows.ps1 -Uninstall`.
 3. Fill in the keyboard and mouse names and the channel (e.g. `1`), then tap **Save**.
    **Test: send the mouse now** should move the mouse right away.
 4. *(optional)* With the keyboard connected to the phone, tap **Choose physical keyboard layout**
-   → your keyboard → each input method → **Português (Brasil ABNT2) - igual ao Windows**.
+   → your keyboard → each input method → pick a layout:
+   * **Português (Brasil ABNT2) - igual ao Windows**: for typing in Android apps.
+   * **Português (Brasil ABNT2) - Área de Trabalho Remota**: for remote desktop (Windows App,
+     RustDesk, ...), e.g. Samsung DeX connected to a Windows PC. Also enable *Use scancode input
+     when available* in Windows App → Settings → General. Accents are then composed by the remote
+     Windows exactly like a local keyboard (`´` + `a` → `á`). In local Android apps the physical
+     accent keys do nothing with this variant (the on-screen keyboard is not affected).
 
 The app runs as a small foreground service (you can hide its notification in Android settings).
 It wakes on every Bluetooth connection change, so it survives reboots, updates and memory cleanup.
@@ -133,8 +139,16 @@ python tools\windows_layout_to_kcm.py my-layout.kcm            # current layout
 python tools\windows_layout_to_kcm.py 00010416 abnt2.kcm      # a specific one (KLID)
 ```
 
+python tools\windows_layout_to_kcm.py --remote rdp.kcm         # remote desktop variant
+```
+
 Put the `.kcm` in `android/res/raw/`, add an entry to `android/res/xml/keyboard_layouts.xml`, and
-build. Ready-made: [`layouts/pt-BR-abnt2-windows.kcm`](layouts/pt-BR-abnt2-windows.kcm).
+build. Ready-made: [`layouts/`](layouts/).
+
+**Why a remote desktop variant?** Remote desktop clients send the character Android produced.
+A dead key (`´`) produces a bare accent, so the remote PC receives `´` and `a` separately. When the
+accent keys produce *no* character, the client falls back to sending the scan code, and the remote
+Windows composes `á` with its own layout.
 
 ## Building the Android app
 
@@ -155,6 +169,7 @@ CI builds the APK on every push and attaches it to releases.
 | Mouse does not follow from the PC | Look at the log. *keyboard idle…* means type a key first, or raise `key_window_s`. *mouse is not connected here* means the mouse was not on this device. |
 | Mouse does not come back from the phone | Open the app and look at the log. Make sure battery optimization is off for LogiSync. |
 | `--status` says *not found* | The name in the config must be part of the Bluetooth name (`Logi K950`, `MX Anywhere 3`). |
+| Remote desktop shows `´a` instead of `á` | Use the *Área de Trabalho Remota* layout variant and enable scancode input in the client. |
 | Linux: permission denied | Reconnect the device after installing so the udev rule applies. |
 
 ## Contributing
