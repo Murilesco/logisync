@@ -127,7 +127,7 @@ def main():
         elif name == mouse and up:
             threading.Thread(target=warm_up, daemon=True).start()
 
-    w = watchers.make([kbd, mouse], on_change)
+    w = watchers.make([kbd, mouse], on_change, base)
     w.start()
     threading.Thread(target=warm_up, daemon=True).start()
     log.info("started: keyboard=%r mouse=%r target channel=%d", kbd, mouse, cfg["target_channel"])

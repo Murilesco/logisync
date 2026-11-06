@@ -3,6 +3,7 @@
 Each watcher calls on_change(name, connected) from any thread.
 """
 import json
+import os
 import subprocess
 import sys
 import threading
@@ -61,9 +62,27 @@ class BlueZWatcher(PollWatcher):
 class WinRTWatcher:
     """Windows: BluetoothLEDevice.ConnectionStatusChanged events (instant)."""
 
-    def __init__(self, names, on_change):
+    def __init__(self, names, on_change, state_dir=None):
         self.names, self.on_change = names, on_change
         self.devices = {}
+        # Bluetooth addresses seen before, so we can watch devices that are on another host
+        # when we start (HID only lists connected devices).
+        self.state = state_dir and os.path.join(state_dir, "devices.json")
+        try:
+            with open(self.state, encoding="utf-8") as f:
+                self.known = json.load(f)
+        except (OSError, TypeError, ValueError):
+            self.known = {}
+
+    def _address(self, name):
+        d = hidpp.find(name)
+        addr = d and hidpp.bt_address(d)
+        if addr and self.known.get(name) != addr:
+            self.known[name] = addr
+            if self.state:
+                with open(self.state, "w", encoding="utf-8") as f:
+                    json.dump(self.known, f)
+        return addr or self.known.get(name)
 
     def start(self):
         import asyncio
@@ -80,13 +99,14 @@ class WinRTWatcher:
             for n in self.names:
                 if n in self.devices:
                     continue
-                d = hidpp.find(n)
-                addr = d and hidpp.bt_address(d)
+                addr = self._address(n)
                 if addr:
                     dev = await BluetoothLEDevice.from_bluetooth_address_async(addr)
                     if dev:
                         self.devices[n] = dev
                         dev.add_connection_status_changed(lambda s, _, n=n: self.on_change(n, up(s)))
+                        if up(dev):
+                            self.on_change(n, True)
             if len(self.devices) < len(self.names):
                 await asyncio.sleep(10)
         while True:
@@ -98,9 +118,9 @@ class WinRTWatcher:
         return bool(dev) and dev.connection_status == BluetoothConnectionStatus.CONNECTED
 
 
-def make(names, on_change):
+def make(names, on_change, state_dir=None):
     if sys.platform == "win32":
-        return WinRTWatcher(names, on_change)
+        return WinRTWatcher(names, on_change, state_dir)
     if sys.platform.startswith("linux"):
         return BlueZWatcher(names, on_change)
     return PollWatcher(names, on_change)
