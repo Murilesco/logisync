@@ -58,29 +58,34 @@ def _open(d):
     return h
 
 
-def host_info(d):
-    """-> (number of hosts, current host index)."""
-    h = _open(d)
-    try:
+_feature_index = {}  # HID path -> CHANGE_HOST index, so a switch needs a single write
+
+
+def _change_host_index(h, d):
+    idx = _feature_index.get(d["path"])
+    if idx is None:
         idx = _request(h, 0x00, 0, FEATURE_CHANGE_HOST >> 8, FEATURE_CHANGE_HOST & 0xFF)[0]
         if not idx:
             raise IOError("device has no CHANGE_HOST feature")
-        r = _request(h, idx, 0)
+        _feature_index[d["path"]] = idx
+    return idx
+
+
+def host_info(d):
+    """-> (number of hosts, current host index). Also caches the CHANGE_HOST index."""
+    h = _open(d)
+    try:
+        r = _request(h, _change_host_index(h, d), 0)
         return r[0], r[1]
     finally:
         h.close()
 
 
 def change_host(d, host):
-    """host: 0 = channel 1, 1 = channel 2, 2 = channel 3. Returns False if already there."""
+    """host: 0 = channel 1, 1 = channel 2, 2 = channel 3. Call host_info() earlier, while nothing
+    is waiting, so this is a single write: a mouse in power saving can take seconds per answer."""
     h = _open(d)
     try:
-        idx = _request(h, 0x00, 0, FEATURE_CHANGE_HOST >> 8, FEATURE_CHANGE_HOST & 0xFF)[0]
-        if not idx:
-            raise IOError("device has no CHANGE_HOST feature")
-        if _request(h, idx, 0)[1] == host:
-            return False
-        _request(h, idx, 1, host, wait=False)  # device switches immediately and never answers
-        return True
+        _request(h, _change_host_index(h, d), 1, host, wait=False)  # switches at once, never answers
     finally:
         h.close()

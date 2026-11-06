@@ -102,19 +102,34 @@ def main():
             with lock:
                 try:
                     d = hidpp.find(mouse)
-                    moved = d and hidpp.change_host(d, cfg["target_channel"] - 1)
-                    log.info("mouse sent to channel %d" if moved else "mouse already on channel %d",
-                             cfg["target_channel"])
+                    if not d:
+                        raise IOError("mouse not found")
+                    hidpp.change_host(d, cfg["target_channel"] - 1)
+                    log.info("mouse sent to channel %d", cfg["target_channel"])
                 except Exception as e:
                     log.info("could not switch the mouse: %s", e)
+
+    def warm_up():
+        """Learn the mouse's CHANGE_HOST index now, so the switch itself is one write."""
+        time.sleep(2)
+        with lock:
+            try:
+                d = hidpp.find(mouse)
+                if d:
+                    hidpp.host_info(d)
+            except Exception as e:
+                log.info("could not query the mouse: %s", e)
 
     def on_change(name, up):
         log.info("%s %s", name, "connected" if up else "disconnected")
         if name == kbd and not up:
             threading.Thread(target=keyboard_left, daemon=True).start()
+        elif name == mouse and up:
+            threading.Thread(target=warm_up, daemon=True).start()
 
     w = watchers.make([kbd, mouse], on_change)
     w.start()
+    threading.Thread(target=warm_up, daemon=True).start()
     log.info("started: keyboard=%r mouse=%r target channel=%d", kbd, mouse, cfg["target_channel"])
     while True:
         time.sleep(3600)
