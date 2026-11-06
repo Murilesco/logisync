@@ -137,8 +137,6 @@ Logs: `logisync.log` next to the config (Linux: `journalctl --user -u logisync`)
 ```powershell
 python tools\windows_layout_to_kcm.py my-layout.kcm            # current layout
 python tools\windows_layout_to_kcm.py 00010416 abnt2.kcm      # a specific one (KLID)
-```
-
 python tools\windows_layout_to_kcm.py --remote rdp.kcm         # remote desktop variant
 ```
 

@@ -39,7 +39,7 @@ def config_dir():
 def load_config(path):
     cfg = dict(DEFAULTS)
     if os.path.exists(path):
-        with open(path, encoding="utf-8") as f:
+        with open(path, encoding="utf-8-sig") as f:
             cfg.update(json.load(f))
     else:
         os.makedirs(os.path.dirname(path), exist_ok=True)
