@@ -1,0 +1,7 @@
+android/build/
+*.keystore
+__pycache__/
+*.pyc
+.venv/
+ios/*.xcodeproj
+.DS_Store

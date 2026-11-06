@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<keyboard-layouts xmlns:android="http://schemas.android.com/apk/res/android">
+    <keyboard-layout
+        android:name="abnt2_windows"
+        android:label="Português (Brasil ABNT2) - igual ao Windows"
+        android:keyboardLayout="@raw/abnt2_windows"
+        android:keyboardLocale="pt-Latn-BR"
+        android:keyboardLayoutType="qwerty" />
+</keyboard-layouts>

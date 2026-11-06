@@ -1,0 +1,21 @@
+# Generate the Xcode project with XcodeGen:  brew install xcodegen && xcodegen
+name: LogiSync
+options:
+  bundleIdPrefix: io.github.logisync
+  deploymentTarget:
+    iOS: "16.0"
+targets:
+  LogiSync:
+    type: application
+    platform: iOS
+    sources: [LogiSync]
+    info:
+      path: LogiSync/Info.plist
+      properties:
+        CFBundleDisplayName: LogiSync
+        UILaunchScreen: {}
+        NSBluetoothAlwaysUsageDescription: LogiSync talks to your Logitech mouse to switch its Easy-Switch channel.
+        UIBackgroundModes: [bluetooth-central]
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: io.github.logisync.app
+      CODE_SIGN_STYLE: Automatic
