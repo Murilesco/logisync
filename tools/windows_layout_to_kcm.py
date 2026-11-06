@@ -95,7 +95,14 @@ def convert(klid, remote=False):
             out.append(f"{pad}{'ralt:':<36}{lit(altgr)}")
         out.append("}\n")
     dec = to_char(hkl, VK_DECIMAL, 0x53)
-    if dec and dec[1] != ".":
+    if remote:
+        # Remote desktop clients forward NumLock to the remote PC, so Android's own NumLock state
+        # never changes and the keypad falls back to arrows. Make the keypad always type digits.
+        for n in range(10):
+            out.append(f"key NUMPAD_{n} {{\n{pad}{'label:':<36}'{n}'\n{pad}{'base:':<36}'{n}'\n}}\n")
+        if dec:
+            out.append(f"key NUMPAD_DOT {{\n{pad}{'label:':<36}{lit(dec)}\n{pad}{'base:':<36}{lit(dec)}\n}}\n")
+    elif dec and dec[1] != ".":
         out.append(f"key NUMPAD_DOT {{\n{pad}{'label:':<36}{literal(dec)}\n{pad}{'base:':<36}fallback FORWARD_DEL\n"
                    f"{pad}{'numlock:':<36}{literal(dec)}\n}}\n")
     return "\n".join(out)
