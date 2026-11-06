@@ -52,8 +52,10 @@ was turned off. Before moving the mouse, the agent checks:
 
 1. the keyboard is still disconnected after 400 ms;
 2. the mouse is still connected (if both vanished, it is the computer's radio, not a switch);
-3. the keyboard was typed on recently (Windows only: Raw Input filtered by the keyboard PID,
-   default window 10 minutes; the keyboard only sleeps after long inactivity).
+3. optionally, the keyboard was typed on recently (Windows only: Raw Input filtered by the keyboard
+   PID, `key_window_s`). Off by default: the K950 kept its Bluetooth link through 3 hours idle and
+   only disconnected on Easy-Switch, so this check only blocked real switches (e.g. coming back
+   from lunch and pressing channel 2 before typing anything).
 
 ## 4. Talking HID++ without a HID driver: the GATT service
 

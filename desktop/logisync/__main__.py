@@ -22,7 +22,7 @@ DEFAULTS = {
     "keyboard": "K950",        # part of the keyboard's Bluetooth name
     "mouse": "MX Anywhere",    # part of the mouse's Bluetooth name
     "target_channel": 2,       # channel (1-3) the mouse goes to when the keyboard leaves
-    "key_window_s": 600,       # only switch if the keyboard was typed on in the last N s (Windows)
+    "key_window_s": 0,         # >0: only switch if the keyboard was typed on in the last N s (Windows)
     "settle_s": 0.4,
     "enabled": True,
 }
@@ -96,7 +96,7 @@ def main():
             log.info("keyboard came back quickly; ignored")
         elif not w.connected(mouse):
             log.info("mouse is not connected here either (sleep/Bluetooth off?); ignored")
-        elif idle > cfg["key_window_s"]:
+        elif cfg["key_window_s"] and idle > cfg["key_window_s"]:
             log.info("keyboard idle for %.0fs (probably power saving); ignored", idle)
         else:
             with lock:

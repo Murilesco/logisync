@@ -126,7 +126,7 @@ validated on a real device. Pull requests are very welcome.
 | `keyboard` | `"K950"` | part of the keyboard's Bluetooth name |
 | `mouse` | `"MX Anywhere"` | part of the mouse's Bluetooth name |
 | `target_channel` | `2` | channel (1-3) the mouse goes to when the keyboard leaves **this** device |
-| `key_window_s` | `600` | Windows: only switch if the keyboard was typed on in the last N seconds, so a sleeping keyboard does not move the mouse |
+| `key_window_s` | `0` (off) | Windows: if > 0, only switch if the keyboard was typed on in the last N seconds. Only useful if your keyboard drops Bluetooth when it sleeps (the K950 does not) |
 | `settle_s` | `0.4` | wait before acting, to ignore short glitches |
 | `enabled` | `true` | turn it off without uninstalling |
 
@@ -164,7 +164,7 @@ CI builds the APK on every push (download it from the run artifacts). Release AP
 
 | Symptom | Check |
 |---|---|
-| Mouse does not follow from the PC | Look at the log. *keyboard idle…* means type a key first, or raise `key_window_s`. *mouse is not connected here* means the mouse was not on this device. |
+| Mouse does not follow from the PC | Look at the log. *keyboard idle…* means `key_window_s` is on: set it to `0`. *mouse is not connected here* means the mouse was not on this device. |
 | Mouse does not come back from the phone | Open the app and look at the log. Make sure battery optimization is off for LogiSync. |
 | `--status` says *not found* | The name in the config must be part of the Bluetooth name (`Logi K950`, `MX Anywhere 3`). |
 | Remote desktop shows `´a` instead of `á` | Use the *Área de Trabalho Remota* layout variant and enable scancode input in the client. |
