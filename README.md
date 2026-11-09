@@ -164,7 +164,7 @@ CI builds the APK on every push (download it from the run artifacts). Release AP
 
 | Symptom | Check |
 |---|---|
-| Mouse does not follow from the PC | Look at the log. *keyboard idle…* means `key_window_s` is on: set it to `0`. *mouse is not connected here* means the mouse was not on this device. |
+| Mouse does not follow from the PC | Look at the log. *keyboard idle…* means `key_window_s` is on: set it to `0`. *mouse asleep here* means the mouse's Bluetooth was parked at switch time (nothing can reach a sleeping mouse): just move the mouse and it jumps to the other device. |
 | Mouse does not come back from the phone | Open the app and look at the log. Make sure battery optimization is off for LogiSync. |
 | `--status` says *not found* | The name in the config must be part of the Bluetooth name (`Logi K950`, `MX Anywhere 3`). |
 | Remote desktop shows `´a` instead of `á` | Use the *Área de Trabalho Remota* layout variant and enable scancode input in the client. |

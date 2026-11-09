@@ -87,6 +87,26 @@ def main():
     guard.start()
     lock = threading.Lock()
 
+    # When the keyboard leaves but the mouse is asleep (Bluetooth radio parked), we cannot reach
+    # it: the host can't wake a sleeping Bluetooth peripheral. So we arm a deferred switch and fire
+    # it the moment the mouse wakes up on this PC (the user wiggles it). pending["until"] is a
+    # monotonic deadline; 0 means nothing pending.
+    pending = {"until": 0.0}
+    PENDING_WINDOW_S = 60
+
+    def do_switch(suffix=""):
+        with lock:
+            try:
+                d = hidpp.find(mouse)
+                if not d:
+                    return False
+                hidpp.change_host(d, cfg["target_channel"] - 1)
+                log.info("mouse sent to channel %d%s", cfg["target_channel"], suffix)
+                return True
+            except Exception as e:
+                log.info("could not switch the mouse: %s", e)
+                return False
+
     def keyboard_left():
         idle = guard.idle_seconds()
         time.sleep(cfg["settle_s"])
@@ -94,20 +114,16 @@ def main():
             return
         if w.connected(kbd):
             log.info("keyboard came back quickly; ignored")
-        elif not w.connected(mouse):
-            log.info("mouse is not connected here either (sleep/Bluetooth off?); ignored")
-        elif cfg["key_window_s"] and idle > cfg["key_window_s"]:
+            return
+        if cfg["key_window_s"] and idle > cfg["key_window_s"]:
             log.info("keyboard idle for %.0fs (probably power saving); ignored", idle)
+            return
+        if do_switch():
+            pending["until"] = 0.0
         else:
-            with lock:
-                try:
-                    d = hidpp.find(mouse)
-                    if not d:
-                        raise IOError("mouse not found")
-                    hidpp.change_host(d, cfg["target_channel"] - 1)
-                    log.info("mouse sent to channel %d", cfg["target_channel"])
-                except Exception as e:
-                    log.info("could not switch the mouse: %s", e)
+            pending["until"] = time.monotonic() + PENDING_WINDOW_S
+            log.info("mouse asleep here; will switch it when it wakes up on this PC (within %ds)",
+                     PENDING_WINDOW_S)
 
     def warm_up():
         """Learn the mouse's CHANGE_HOST index now, so the switch itself is one write."""
@@ -120,12 +136,24 @@ def main():
             except Exception as e:
                 log.info("could not query the mouse: %s", e)
 
+    def mouse_woke():
+        # The mouse just reconnected here. If a switch is pending and the keyboard did not come
+        # back to this PC, send it over now. Give the HID interface a moment to enumerate first.
+        time.sleep(1.5)
+        if time.monotonic() < pending["until"] and not w.connected(kbd):
+            pending["until"] = 0.0
+            do_switch(" (after it woke up)")
+        else:
+            warm_up()
+
     def on_change(name, up):
         log.info("%s %s", name, "connected" if up else "disconnected")
         if name == kbd and not up:
             threading.Thread(target=keyboard_left, daemon=True).start()
+        elif name == kbd and up:
+            pending["until"] = 0.0  # user is back on this PC; drop any deferred switch
         elif name == mouse and up:
-            threading.Thread(target=warm_up, daemon=True).start()
+            threading.Thread(target=mouse_woke, daemon=True).start()
 
     w = watchers.make([kbd, mouse], on_change, base)
     w.start()
